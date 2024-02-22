@@ -1,0 +1,28 @@
+.board {
+  width: 600px;
+  height: 600px;
+  border: 1px solid #000;
+}
+
+.board-tile {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #000;
+  line-height: 0%;
+}
+
+.white-tile {
+  background-color: #fff;
+}
+
+.black-tile {
+  background-color: #aaa;
+}
+
+.selected-tile {
+  background-color: #f00;
+}
+
+.legal-move {
+  background-color: #0f0;
+}
