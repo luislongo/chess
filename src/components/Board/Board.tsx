@@ -1,47 +1,54 @@
-import { Chessboard } from "../../chess/types/Chessboard";
-import { Piece } from "../../chess/types/Piece";
-import { Position } from "../../chess/types/Position";
+import { Square } from "chess.js";
 import { PieceComponent } from "../PieceComponent/PieceComponent";
-import "./Board.css";
+import { BoardType } from "../../chess/types/Board";
 
 export type BoardProps = {
-  chessboard: Chessboard;
-  onCellClick: (position: Position) => void;
-  selected?: { pos: Position; piece: Piece };
-  legalMoves?: Position[];
+  board: BoardType;
+  squareColor: (square: Square) => "light" | "dark" | null;
+  onClick?: (square: Square) => void;
+  selectedSquare?: Square;
+  validMoves?: Square[];
 };
 
 export const Board: React.FC<BoardProps> = ({
-  chessboard,
-  onCellClick,
-  selected,
-  legalMoves: validMoves,
+  board,
+  onClick,
+  squareColor,
+  selectedSquare,
+  validMoves,
 }) => {
-  const isEven = (num: number) => num % 2 === 0;
-  const isSelected = (row: number, col: number) =>
-    selected && selected.pos.row === row && selected.pos.col === col;
-  const isLegalMove = (row: number, col: number) =>
-    validMoves &&
-    validMoves.some((move) => move.row === row && move.col === col);
-
   return (
-    <table className="board">
+    <table className="h-5/6 w-auto aspect-square">
       <tbody>
-        {chessboard.map((row, i) => (
-          <tr key={i}>
-            {row.map((piece, j) => (
-              <td
-                key={j}
-                className={`board-tile ${
-                  isEven(i + j) ? "white-tile" : "black-tile"
-                } ${isSelected(i, j) ? "selected-tile" : ""}
-                ${isLegalMove(i, j) ? "legal-move" : ""}
-                `}
-                onClick={() => onCellClick({ row: i, col: j })}
-              >
-                {piece && <PieceComponent {...piece} />}
-              </td>
-            ))}
+        {board.map((row, i) => (
+          <tr key={i} className="">
+            {row.map((piece, j) => {
+              //Convert the row and column to a square name
+              const squareName = (String.fromCharCode(97 + j) +
+                (8 - i)) as Square;
+
+              return (
+                <td
+                  key={j}
+                  className={`
+                  w-8 h-8 relative ${
+                    selectedSquare === squareName
+                      ? "bg-blue-500"
+                      : validMoves?.includes(squareName)
+                      ? "bg-green-500"
+                      : squareColor(squareName) === "light"
+                      ? "bg-gray-300"
+                      : "bg-gray-500"
+                  }
+              `}
+                  onClick={() => onClick?.(squareName)}
+                >
+                  {piece && (
+                    <PieceComponent type={piece.type} color={piece.color} />
+                  )}
+                </td>
+              );
+            })}
           </tr>
         ))}
       </tbody>

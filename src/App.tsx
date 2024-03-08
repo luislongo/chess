@@ -1,31 +1,22 @@
-import "./App.css";
-import { pieces } from "./chess/constants/pieces";
 import { useChessboard } from "./chess/hooks/useChessboard";
-import { useMovePiece } from "./chess/hooks/useMovePiece";
-import { Board } from "./components/Board/Board";
-import { MoveHistory } from "./components/MoveHistory/MoveHistory";
+import { useGameState } from "./chess/hooks/useGamesState";
+import { useRenderer } from "./chess/hooks/useRenderer";
+import { InitializeGame } from "./chess/states/InitializeGame";
 
 function App() {
-  const { chessboard, movePiece, graveyard } = useChessboard();
-  const { handleCellClick, turn, moveHistory, selected, legalMoves } =
-    useMovePiece(movePiece, chessboard);
+  const { chessboard } = useChessboard();
+  const renderer = useRenderer();
+
+  const { onClick } = useGameState(InitializeGame(), {
+    chessboard,
+    renderer,
+  });
+
+  onClick("a1");
 
   return (
-    <div className="panel">
-      <div>{graveyard[0]?.map((piece) => pieces[piece.color][piece.type])}</div>
-      <Board
-        chessboard={chessboard}
-        onCellClick={handleCellClick}
-        selected={selected}
-        legalMoves={legalMoves}
-      />
-      <div>{graveyard[1]?.map((piece) => pieces[piece.color][piece.type])}</div>
-      <div>
-        <h2>Turn: {turn}</h2>
-        <div>
-          <MoveHistory history={moveHistory} />
-        </div>
-      </div>
+    <div className="absolute left-0 top-0 flex flex-row h-full w-full">
+      <div className="flex flex-col items-start" ref={renderer.ref} />
     </div>
   );
 }

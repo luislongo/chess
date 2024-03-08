@@ -1,32 +1,32 @@
-import { useState } from "react";
+import { Chess, Square } from "chess.js";
+import { useRef, useState } from "react";
 import { Chessboard } from "../types/Chessboard";
-import { Position } from "../types/Position";
-import { initialPosition } from "../constants/initialPosition";
-import { Piece } from "../types/Piece";
 
 export const useChessboard = () => {
-  const [chessboard, setChessboard] = useState<Chessboard>(initialPosition);
-  const [graveyard, setGraveyard] = useState<Piece[][]>([[], []]);
+  const chess = useRef(new Chess());
+  const ref = useRef<HTMLDivElement>(null);
+  const [board, setBoard] = useState(chess.current.board());
 
-  const movePiece = (from: Position, to: Position) => {
-    const fromPiece = chessboard[from.row][from.col];
-    const toPiece = chessboard[to.row][to.col];
-
-    setChessboard((prev) => {
-      const newChessboard = prev.map((row) => row.slice());
-      newChessboard[to.row][to.col] = fromPiece;
-      newChessboard[from.row][from.col] = null;
-      return newChessboard;
-    });
-
-    if (toPiece) {
-      setGraveyard((prev) => {
-        const newGraveyard = prev.map((row) => row.slice());
-        newGraveyard[toPiece.color === "white" ? 0 : 1].push(toPiece);
-        return newGraveyard;
-      });
-    }
+  return {
+    board,
+    chessboard: {
+      move: (move, args_1) => {
+        chess.current.move(move, args_1);
+        setBoard(chess.current.board());
+      },
+      squareColor: (square: Square) => {
+        return chess.current.squareColor(square);
+      },
+      moves: () => {
+        return chess.current.moves();
+      },
+      fen: () => {
+        return chess.current.fen();
+      },
+      board: () => {
+        return chess.current.board();
+      },
+    } as Chessboard,
+    ref,
   };
-
-  return { chessboard, movePiece, graveyard };
 };
