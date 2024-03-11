@@ -1,35 +1,76 @@
 import { Square } from "chess.js";
-import { AIMoves } from "./AIMoves";
 import { GameContext } from "../types/GameContext";
+import { AIMoves } from "./AIMoves";
 
-export const PlayerMoves = () => {
-  let selectedSquare: Square | null = null;
+export const PlayerSelectsPiece = () => {
+  let mouseEnterCallbackId = "";
+  let mouseLeaveCallbackId = "";
+  let clickCallbackId = "";
 
-  const onClick = (square: Square, ctx: GameContext) => {
-    if (selectedSquare === null) {
-      selectedSquare = square;
-      return;
-    }
+  const onAdd = (ctx: GameContext) => {
+    clickCallbackId = ctx.renderer.on("click", (square) => {
+      const piece = ctx.chessboard.get(square);
 
-    if (selectedSquare === square) {
-      ctx.setState(PlayerMoves());
-      return;
-    }
-
-    if (selectedSquare !== null) {
-      try {
-        ctx.chessboard.move({
-          from: selectedSquare,
-          to: square,
-          promotion: "q",
-        });
-
-        ctx.setState(AIMoves());
-      } catch (e) {
-        ctx.setState(PlayerMoves());
+      if (piece) {
+        ctx.setState(PlayerMovesPiece(square)());
       }
-    }
+    });
+    mouseEnterCallbackId = ctx.renderer.on("onMouseEnter", (square) => {
+      ctx.renderer.highlightSquare(square);
+    });
+    mouseLeaveCallbackId = ctx.renderer.on("onMouseLeave", (square) => {
+      ctx.renderer.removeHighlight(square);
+    });
   };
 
-  return { onClick };
+  const onRemove = (ctx: GameContext) => {
+    ctx.renderer.off("click", clickCallbackId);
+    ctx.renderer.off("onMouseEnter", mouseEnterCallbackId);
+    ctx.renderer.off("onMouseLeave", mouseLeaveCallbackId);
+  };
+
+  return { onAdd, onRemove };
+};
+
+export const PlayerMovesPiece = (square: Square) => () => {
+  let clickCallbackId = "";
+
+  const onAdd = (ctx: GameContext) => {
+    ctx.renderer.highlightSquare(square);
+
+    clickCallbackId = ctx.renderer.on("click", (sq: Square) => {
+      if (sq === square) {
+        ctx.setState(PlayerSelectsPiece());
+      }
+
+      if (sq !== square) {
+        try {
+          ctx.chessboard.move({
+            from: square,
+            to: sq,
+          });
+
+          ctx.renderer.movePiece({
+            from: square,
+            to: sq,
+          });
+
+          ctx.setState(AIMoves());
+          ctx.renderer.removeHighlight(square);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    });
+  };
+
+  const onRemove = (ctx: GameContext) => {
+    ctx.renderer.off("click", clickCallbackId);
+    ctx.renderer.removeHighlight(square);
+  };
+
+  return {
+    onAdd,
+    onRemove,
+  };
 };

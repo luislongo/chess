@@ -1,6 +1,6 @@
 import { Chess } from "chess.js";
 import { GameContext } from "../types/GameContext";
-import { PlayerMoves } from "./PlayerMoves";
+import { PlayerSelectsPiece } from "./PlayerMoves";
 import { minMaxSearch } from "../search/minMax";
 import { evaluateBoard } from "../search/evaluateBoard";
 
@@ -13,8 +13,12 @@ export const AIMoves = () => {
       Infinity,
       evaluateBoard
     );
-    ctx.chessboard.move(move);
-    ctx.setState(PlayerMoves());
+    const moveObj = ctx.chessboard.move(move);
+    ctx.renderer.movePiece({
+      from: moveObj.from,
+      to: moveObj.to,
+    });
+    ctx.setState(PlayerSelectsPiece());
   };
 
   return { onAdd };

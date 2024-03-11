@@ -11,8 +11,8 @@ export const useChessboard = () => {
     board,
     chessboard: {
       move: (move, args_1) => {
-        chess.current.move(move, args_1);
         setBoard(chess.current.board());
+        return chess.current.move(move, args_1);
       },
       squareColor: (square: Square) => {
         return chess.current.squareColor(square);
@@ -25,6 +25,9 @@ export const useChessboard = () => {
       },
       board: () => {
         return chess.current.board();
+      },
+      get: (square: Square) => {
+        return chess.current.get(square);
       },
     } as Chessboard,
     ref,

@@ -1,11 +1,21 @@
 import { GameContext } from "../types/GameContext";
+import { PlayerSelectsPiece } from "./PlayerMoves";
 
 export const InitializeGame = () => {
+  let callbackId: string | null = null;
+
   const onAdd = (ctx: GameContext) => {
     ctx.renderer.initializeBoard();
     ctx.renderer.loadBoardState(ctx.chessboard.board());
-    ctx.renderer.onClick((square) => console.log(square));
+    callbackId = ctx.renderer.on("click", (square) => console.log(square));
+    ctx.setState(PlayerSelectsPiece());
   };
 
-  return { onAdd };
+  const onRemove = (ctx: GameContext) => {
+    if (callbackId) {
+      ctx.renderer.off("click", callbackId);
+    }
+  };
+
+  return { onAdd, onRemove };
 };
